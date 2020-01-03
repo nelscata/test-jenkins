@@ -1,19 +1,26 @@
 #!/usr/bin/env groovy
-
 node {
- 
-    withMaven(maven:'maven') {
- 
-        stage('Checkout') {
-            git url: 'https://github.com/spring-projects/spring-petclinic', credentialsId: 'nelscata', branch: 'master'
-        }
- 
-        stage('Build') {
-            sh 'mvn clean install'
- 
-            def pom = readMavenPom file:'pom.xml'
-            print pom.version
-            env.version = pom.version
+    stage 'Clone the project'
+    git 'https://github.com/spring-projects/spring-petclinic'
+   
+    dir('spring-petclinic') {
+        stage("Compilation and Analysis") {
+            parallel 'Compilation': {
+                sh "./mvnw package"
+            }, 'Static Analysis': {
+                stage("Checkstyle") {
+                    sh "./mvnw checkstyle:checkstyle"
+                     
+                    step([$class: 'CheckStylePublisher',
+                      canRunOnFailed: true,
+                      defaultEncoding: '',
+                      healthy: '100',
+                      pattern: '**/target/checkstyle-result.xml',
+                      unHealthy: '90',
+                      useStableBuildAsReference: true
+                    ])
+                }
+            }
         }
     }
 }
