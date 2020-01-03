@@ -6,8 +6,7 @@ import jenkins.plugins.git.*
 import org.jenkinsci.plugins.workflow.multibranch.*
  
 // Git repo url containing a Jenkinsfile
-// String gitRepoUrl = "https://github.com/cinqict/jenkinsdev"
-String gitRepoUrl = "https://github.com/spring-projects/spring-petclinic"
+String gitRepoUrl = "https://github.com/nelscata/test-jenkins"
  
 // Job name based on repository name
 String jobName = gitRepoUrl.tokenize(".")[-2].tokenize("/")[-1]
