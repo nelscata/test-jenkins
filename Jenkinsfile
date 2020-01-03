@@ -15,4 +15,5 @@ node {
             print pom.version
             env.version = pom.version
         }
+    }
 }
