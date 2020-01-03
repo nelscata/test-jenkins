@@ -7,7 +7,8 @@ pipeline {
             steps {
                 sh 'git clone https://github.com/spring-projects/spring-petclinic.git'
 		sh 'cd spring-petclinic'
-		sh './mvnw package'
+		def mvnHome = tool name: 'Maven 3.6.3', type: 'maven'
+		sh "${mvnHome}/bin/mvn package"
 		sh 'java -jar target/*.jar'
             }
         }
