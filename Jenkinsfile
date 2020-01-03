@@ -1,15 +1,30 @@
 #!/usr/bin/env groovy
+pipeline {
+   agent any
 
-node {
- 
-    git url: 'https://github.com/spring-projects/spring-petclinic.git'
- 
-    // install Maven and add it to the path
-    env.PATH = "${tool 'M3'}/bin:${env.PATH}"
- 
-    configFileProvider(
-        [configFile(fileId: 'maven-settings', variable: 'MAVEN_SETTINGS')]) {
-        sh 'mvn -s $MAVEN_SETTINGS clean package'
-    }
- 
+   tools {
+      // Install the Maven version configured as "M3" and add it to the path.
+      maven ""
+   }
+
+   stages {
+      stage('Build') {
+         steps {
+            // Get some code from a GitHub repository
+            git 'https://github.com/spring-projects/spring-petclinic'
+
+            sh "mvn -Dmaven.test.failure.ignore=true clean package"
+
+         }
+
+         post {
+            // If Maven was able to run the tests, even if some of the test
+            // failed, record the test results and archive the jar file.
+            success {
+               junit '**/target/surefire-reports/TEST-*.xml'
+               archiveArtifacts 'target/*.jar'
+            }
+         }
+      }
+   }
 }
