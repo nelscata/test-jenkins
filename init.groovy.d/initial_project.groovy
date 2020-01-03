@@ -26,7 +26,7 @@ PersistedList sources = mbp.getSourcesList()
 sources.add(branchSource)
  
 // Trigger initial build (scan)
-jenkins.getItem(jobName).scheduleBuild()
+//jenkins.getItem(jobName).scheduleBuild()
  
 // Save config
 jenkins.save()
