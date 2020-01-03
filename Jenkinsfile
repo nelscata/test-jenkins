@@ -1,26 +1,30 @@
 #!/usr/bin/env groovy
-node {
-    stage 'Clone the project'
-    git 'https://github.com/spring-projects/spring-petclinic'
-   
-    dir('spring-petclinic') {
-        stage("Compilation and Analysis") {
-            parallel 'Compilation': {
-                sh "./mvnw package"
-            }, 'Static Analysis': {
-                stage("Checkstyle") {
-                    sh "./mvnw checkstyle:checkstyle"
-                     
-                    step([$class: 'CheckStylePublisher',
-                      canRunOnFailed: true,
-                      defaultEncoding: '',
-                      healthy: '100',
-                      pattern: '**/target/checkstyle-result.xml',
-                      unHealthy: '90',
-                      useStableBuildAsReference: true
-                    ])
-                }
+pipeline {
+   agent any
+
+   tools {
+      // Install the Maven version configured as "M3" and add it to the path.
+      maven "M3"
+   }
+
+   stages {
+      stage('Build') {
+         steps {
+            // Get some code from a GitHub repository
+            git 'https://github.com/spring-projects/spring-petclinic'
+
+            sh "mvn -Dmaven.test.failure.ignore=true clean package"
+
+         }
+
+         post {
+            // If Maven was able to run the tests, even if some of the test
+            // failed, record the test results and archive the jar file.
+            success {
+               junit '**/target/surefire-reports/TEST-*.xml'
+               archiveArtifacts 'target/*.jar'
             }
-        }
-    }
+         }
+      }
+   }
 }
