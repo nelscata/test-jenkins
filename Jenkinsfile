@@ -1,15 +1,18 @@
 #!/usr/bin/env groovy
 
-pipeline {
-    agent any
-    stages {
-        stage('Build') {
-            steps {
-                sh 'git clone https://github.com/spring-projects/spring-petclinic.git'
-		sh 'cd spring-petclinic'
-		sh 'mvn compile'
-		sh 'mvn package'
-            }
+node {
+ 
+    withMaven(maven:'maven') {
+ 
+        stage('Checkout') {
+            git url: 'https://github.com/spring-projects/spring-petclinic', credentialsId: 'nelscata', branch: 'master'
         }
-    }
+ 
+        stage('Build') {
+            sh 'mvn clean install'
+ 
+            def pom = readMavenPom file:'pom.xml'
+            print pom.version
+            env.version = pom.version
+        }
 }
